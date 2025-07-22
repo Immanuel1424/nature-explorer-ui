@@ -2,41 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* EcoFilesystem Design System - Nature-inspired colors and gradients */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Nature-inspired color palette */
+    --background: 120 20% 97%;
+    --foreground: 25 30% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 120 15% 98%;
+    --card-foreground: 25 30% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 120 15% 98%;
+    --popover-foreground: 25 30% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Forest green primary */
+    --primary: 140 60% 35%;
+    --primary-foreground: 120 15% 98%;
+    --primary-glow: 140 50% 55%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Earth brown secondary */
+    --secondary: 25 45% 85%;
+    --secondary-foreground: 25 50% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Soft moss green muted */
+    --muted: 110 25% 92%;
+    --muted-foreground: 110 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Sage accent */
+    --accent: 95 25% 88%;
+    --accent-foreground: 95 30% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Warning autumn colors */
+    --destructive: 15 85% 55%;
+    --destructive-foreground: 120 15% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Nature borders */
+    --border: 120 20% 88%;
+    --input: 120 20% 92%;
+    --ring: 140 60% 35%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Eco-specific design tokens */
+    --forest-canopy: 140 70% 25%;
+    --tree-bark: 25 50% 35%;
+    --leaf-green: 110 60% 45%;
+    --earth-brown: 30 40% 30%;
+    --sky-blue: 200 75% 85%;
+    --sun-yellow: 45 95% 75%;
+
+    /* Gradients */
+    --gradient-forest: linear-gradient(135deg, hsl(var(--forest-canopy)), hsl(var(--primary)));
+    --gradient-earth: linear-gradient(180deg, hsl(var(--earth-brown)), hsl(var(--tree-bark)));
+    --gradient-canopy: linear-gradient(45deg, hsl(var(--leaf-green)), hsl(var(--primary-glow)));
+    --gradient-sky: linear-gradient(180deg, hsl(var(--sky-blue)), hsl(var(--background)));
+
+    /* Shadows with organic feel */
+    --shadow-organic: 0 8px 25px -8px hsl(var(--forest-canopy) / 0.3);
+    --shadow-leaf: 0 4px 15px -4px hsl(var(--leaf-green) / 0.4);
+    --shadow-deep: 0 12px 40px -12px hsl(var(--earth-brown) / 0.5);
+
+    /* Transitions */
+    --transition-organic: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    --transition-growth: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,41 +85,43 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode with deep forest theme */
+    --background: 140 30% 8%;
+    --foreground: 110 20% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 140 25% 10%;
+    --card-foreground: 110 20% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 140 25% 10%;
+    --popover-foreground: 110 20% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 140 50% 60%;
+    --primary-foreground: 140 30% 8%;
+    --primary-glow: 140 60% 70%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 25 20% 20%;
+    --secondary-foreground: 110 20% 90%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 140 20% 15%;
+    --muted-foreground: 110 15% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 95 15% 25%;
+    --accent-foreground: 110 20% 90%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 15 70% 50%;
+    --destructive-foreground: 110 20% 90%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 140 20% 20%;
+    --input: 140 20% 15%;
+    --ring: 140 50% 60%;
+
+    /* Dark mode eco tokens */
+    --forest-canopy: 140 60% 15%;
+    --tree-bark: 25 30% 20%;
+    --leaf-green: 110 40% 35%;
+    --earth-brown: 30 25% 15%;
+    --sky-blue: 200 30% 25%;
+    --sun-yellow: 45 60% 40%;
   }
 }
 

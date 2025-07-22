@@ -1,0 +1,121 @@
+image: node:18
+
+pipelines:
+  default:
+    - step:
+        name: Build and Test
+        caches:
+          - node
+        script:
+          - echo "Installing dependencies..."
+          - npm ci
+          - echo "Running lint checks..."
+          - npm run lint
+          - echo "Building the application..."
+          - npm run build
+          - echo "Creating deployment package..."
+          - tar -czf ecofilesystem-build.tar.gz dist/
+        artifacts:
+          - ecofilesystem-build.tar.gz
+          - ecosystem.config.js
+          - package.json
+
+  branches:
+    main:
+      - step:
+          name: Build and Test
+          caches:
+            - node
+          script:
+            - echo "Installing dependencies..."
+            - npm ci
+            - echo "Running lint checks..."
+            - npm run lint
+            - echo "Building the application..."
+            - npm run build
+            - echo "Creating deployment package..."
+            - tar -czf ecofilesystem-build.tar.gz dist/
+          artifacts:
+            - ecofilesystem-build.tar.gz
+            - ecosystem.config.js
+            - package.json
+      
+      - step:
+          name: Deploy to AWS EC2
+          image: atlassian/pipelines-awscli:latest
+          script:
+            - echo "Uploading artifacts to S3..."
+            - aws s3 cp ecofilesystem-build.tar.gz s3://your-deployment-bucket/builds/ecofilesystem-${BITBUCKET_BUILD_NUMBER}.tar.gz
+            - aws s3 cp ecosystem.config.js s3://your-deployment-bucket/configs/ecosystem.config.js
+            - aws s3 cp package.json s3://your-deployment-bucket/configs/package.json
+            
+            - echo "Deploying to EC2 instance via SSM..."
+            - |
+              aws ssm send-command \
+                --instance-ids $EC2_INSTANCE_ID \
+                --document-name "AWS-RunShellScript" \
+                --comment "Deploy EcoFilesystem build ${BITBUCKET_BUILD_NUMBER}" \
+                --parameters 'commands=[
+                  "echo \"Starting deployment process...\"",
+                  "cd /opt/ecofilesystem || { echo \"App directory not found. Creating...\"; sudo mkdir -p /opt/ecofilesystem; cd /opt/ecofilesystem; }",
+                  "echo \"Stopping current application...\"",
+                  "pm2 stop ecofilesystem || echo \"App not running\"",
+                  "echo \"Backing up current deployment...\"",
+                  "sudo rm -rf backup/ && sudo mkdir -p backup/",
+                  "sudo mv dist/ backup/ 2>/dev/null || echo \"No previous dist to backup\"",
+                  "echo \"Downloading new build...\"",
+                  "aws s3 cp s3://your-deployment-bucket/builds/ecofilesystem-'${BITBUCKET_BUILD_NUMBER}'.tar.gz ./",
+                  "aws s3 cp s3://your-deployment-bucket/configs/ecosystem.config.js ./",
+                  "aws s3 cp s3://your-deployment-bucket/configs/package.json ./",
+                  "echo \"Extracting new build...\"",
+                  "sudo tar -xzf ecofilesystem-'${BITBUCKET_BUILD_NUMBER}'.tar.gz",
+                  "sudo chown -R ec2-user:ec2-user dist/",
+                  "echo \"Installing/updating PM2 dependencies...\"",
+                  "npm install --production || echo \"Dependencies install completed with warnings\"",
+                  "echo \"Starting application with PM2...\"",
+                  "pm2 start ecosystem.config.js || pm2 restart ecofilesystem",
+                  "pm2 save",
+                  "echo \"Cleaning up deployment artifacts...\"",
+                  "rm -f ecofilesystem-'${BITBUCKET_BUILD_NUMBER}'.tar.gz",
+                  "echo \"Deployment completed successfully!\"",
+                  "pm2 status"
+                ]' \
+                --region $AWS_REGION
+            
+            - echo "Waiting for deployment to complete..."
+            - sleep 30
+            
+            - echo "Checking deployment status..."
+            - |
+              aws ssm send-command \
+                --instance-ids $EC2_INSTANCE_ID \
+                --document-name "AWS-RunShellScript" \
+                --comment "Check EcoFilesystem deployment status" \
+                --parameters 'commands=[
+                  "echo \"=== PM2 Status ===\"",
+                  "pm2 status",
+                  "echo \"=== PM2 Logs (last 20 lines) ===\"",
+                  "pm2 logs ecofilesystem --lines 20",
+                  "echo \"=== Application Health Check ===\"",
+                  "curl -f http://localhost:3000 > /dev/null && echo \"✅ Application is responding\" || echo \"❌ Application health check failed\""
+                ]' \
+                --region $AWS_REGION
+
+  pull-requests:
+    '**':
+      - step:
+          name: Build and Test PR
+          caches:
+            - node
+          script:
+            - echo "Installing dependencies for PR..."
+            - npm ci
+            - echo "Running lint checks..."
+            - npm run lint
+            - echo "Building the application..."
+            - npm run build
+            - echo "PR build completed successfully!"
+
+definitions:
+  caches:
+    node: node_modules

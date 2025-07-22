@@ -1,12 +1,46 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Header } from '@/components/Header';
+import { Home } from './Home';
+import { EcosystemExplorer } from './EcosystemExplorer';
+import { About } from './About';
 
 const Index = () => {
+  const [currentPage, setCurrentPage] = useState('home');
+  const navigate = useNavigate();
+
+  const handleNavigate = (page: string) => {
+    setCurrentPage(page);
+    
+    // Update URL based on page
+    switch (page) {
+      case 'explorer':
+        navigate('/explorer');
+        break;
+      case 'about':
+        navigate('/about');
+        break;
+      default:
+        navigate('/');
+        break;
+    }
+  };
+
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case 'explorer':
+        return <EcosystemExplorer />;
+      case 'about':
+        return <About />;
+      default:
+        return <Home onNavigate={handleNavigate} />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header currentPage={currentPage} onNavigate={handleNavigate} />
+      {renderCurrentPage()}
     </div>
   );
 };
