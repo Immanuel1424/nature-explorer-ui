@@ -14,9 +14,9 @@ pipelines:
           - echo "Building the application..."
           - npm run build
           - echo "Creating deployment package..."
-          - tar -czf ecofilesystem-build.tar.gz dist/
+          - tar -czf facility-management-build.tar.gz build/
         artifacts:
-          - ecofilesystem-build.tar.gz
+          - facility-management-build.tar.gz
           - ecosystem.config.js
           - package.json
 
@@ -34,9 +34,9 @@ pipelines:
             - echo "Building the application..."
             - npm run build
             - echo "Creating deployment package..."
-            - tar -czf ecofilesystem-build.tar.gz dist/
+            - tar -czf facility-management-build.tar.gz build/
           artifacts:
-            - ecofilesystem-build.tar.gz
+            - facility-management-build.tar.gz
             - ecosystem.config.js
             - package.json
       
@@ -45,7 +45,7 @@ pipelines:
           image: atlassian/pipelines-awscli:latest
           script:
             - echo "Uploading artifacts to S3..."
-            - aws s3 cp ecofilesystem-build.tar.gz s3://your-deployment-bucket/builds/ecofilesystem-${BITBUCKET_BUILD_NUMBER}.tar.gz
+            - aws s3 cp facility-management-build.tar.gz s3://your-deployment-bucket/builds/facility-management-${BITBUCKET_BUILD_NUMBER}.tar.gz
             - aws s3 cp ecosystem.config.js s3://your-deployment-bucket/configs/ecosystem.config.js
             - aws s3 cp package.json s3://your-deployment-bucket/configs/package.json
             
@@ -54,29 +54,29 @@ pipelines:
               aws ssm send-command \
                 --instance-ids $EC2_INSTANCE_ID \
                 --document-name "AWS-RunShellScript" \
-                --comment "Deploy EcoFilesystem build ${BITBUCKET_BUILD_NUMBER}" \
+                --comment "Deploy Facility Management build ${BITBUCKET_BUILD_NUMBER}" \
                 --parameters 'commands=[
                   "echo \"Starting deployment process...\"",
-                  "cd /opt/ecofilesystem || { echo \"App directory not found. Creating...\"; sudo mkdir -p /opt/ecofilesystem; cd /opt/ecofilesystem; }",
+                  "cd /opt/facility-management || { echo \"App directory not found. Creating...\"; sudo mkdir -p /opt/facility-management; cd /opt/facility-management; }",
                   "echo \"Stopping current application...\"",
-                  "pm2 stop ecofilesystem || echo \"App not running\"",
+                  "pm2 stop facility-frontend || echo \"App not running\"",
                   "echo \"Backing up current deployment...\"",
                   "sudo rm -rf backup/ && sudo mkdir -p backup/",
-                  "sudo mv dist/ backup/ 2>/dev/null || echo \"No previous dist to backup\"",
+                  "sudo mv build/ backup/ 2>/dev/null || echo \"No previous build to backup\"",
                   "echo \"Downloading new build...\"",
-                  "aws s3 cp s3://your-deployment-bucket/builds/ecofilesystem-'${BITBUCKET_BUILD_NUMBER}'.tar.gz ./",
+                  "aws s3 cp s3://your-deployment-bucket/builds/facility-management-'${BITBUCKET_BUILD_NUMBER}'.tar.gz ./",
                   "aws s3 cp s3://your-deployment-bucket/configs/ecosystem.config.js ./",
                   "aws s3 cp s3://your-deployment-bucket/configs/package.json ./",
                   "echo \"Extracting new build...\"",
-                  "sudo tar -xzf ecofilesystem-'${BITBUCKET_BUILD_NUMBER}'.tar.gz",
-                  "sudo chown -R ec2-user:ec2-user dist/",
+                  "sudo tar -xzf facility-management-'${BITBUCKET_BUILD_NUMBER}'.tar.gz",
+                  "sudo chown -R ubuntu:ubuntu build/",
                   "echo \"Installing/updating PM2 dependencies...\"",
                   "npm install --production || echo \"Dependencies install completed with warnings\"",
                   "echo \"Starting application with PM2...\"",
-                  "pm2 start ecosystem.config.js || pm2 restart ecofilesystem",
+                  "pm2 start ecosystem.config.js || pm2 restart facility-frontend",
                   "pm2 save",
                   "echo \"Cleaning up deployment artifacts...\"",
-                  "rm -f ecofilesystem-'${BITBUCKET_BUILD_NUMBER}'.tar.gz",
+                  "rm -f facility-management-'${BITBUCKET_BUILD_NUMBER}'.tar.gz",
                   "echo \"Deployment completed successfully!\"",
                   "pm2 status"
                 ]' \
@@ -90,12 +90,12 @@ pipelines:
               aws ssm send-command \
                 --instance-ids $EC2_INSTANCE_ID \
                 --document-name "AWS-RunShellScript" \
-                --comment "Check EcoFilesystem deployment status" \
+                --comment "Check Facility Management deployment status" \
                 --parameters 'commands=[
                   "echo \"=== PM2 Status ===\"",
                   "pm2 status",
                   "echo \"=== PM2 Logs (last 20 lines) ===\"",
-                  "pm2 logs ecofilesystem --lines 20",
+                  "pm2 logs facility-frontend --lines 20",
                   "echo \"=== Application Health Check ===\"",
                   "curl -f http://localhost:3000 > /dev/null && echo \"✅ Application is responding\" || echo \"❌ Application health check failed\""
                 ]' \

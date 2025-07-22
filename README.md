@@ -1,21 +1,21 @@
-# EcoFilesystem
+# Facility Management System
 
-> **Nature's Digital Hierarchy** - An interactive web application that visualizes forest ecosystems through hierarchical structures, making complex ecological relationships accessible and understandable.
+> **Comprehensive Digital Infrastructure** - A modern React application for managing facility assets, work orders, maintenance schedules, and reporting in an intuitive and efficient interface.
 
-![EcoFilesystem Screenshot](https://via.placeholder.com/800x400/22c55e/ffffff?text=EcoFilesystem+Preview)
+![Facility Management System Screenshot](https://via.placeholder.com/800x400/3b82f6/ffffff?text=Facility+Management+System)
 
 ## 🌟 Overview
 
-EcoFilesystem is a modern React application that represents forest ecosystems as interactive file-like hierarchical structures. Users can explore different forest layers, from entire ecosystems down to individual organisms, understanding the complex relationships that sustain our natural world.
+The Facility Management System is a modern React application designed to streamline facility operations through comprehensive asset tracking, work order management, preventive maintenance scheduling, and detailed reporting capabilities.
 
 ### ✨ Key Features
 
-- **🌲 Hierarchical Visualization**: Navigate forest ecosystems through intuitive tree-like structures
-- **🍃 Interactive Ecosystem Map**: Explore different forest layers with dynamic diagrams
-- **💚 Health Monitoring**: Track ecosystem component health with visual indicators
-- **🔍 Advanced Search & Filtering**: Find specific species, characteristics, or habitats
+- **🏢 Asset Management**: Track and monitor all facility assets with detailed information
+- **📋 Work Order System**: Create, assign, and track maintenance and repair tasks
+- **🔧 Maintenance Scheduling**: Automated preventive maintenance scheduling and reminders
+- **📊 Advanced Reporting**: Comprehensive analytics and performance reporting
 - **📱 Responsive Design**: Fully optimized for desktop, tablet, and mobile devices
-- **🎨 Modern UI**: Beautiful nature-inspired design with smooth animations
+- **🎨 Modern UI**: Clean, professional interface with intuitive navigation
 
 ## 🚀 Quick Start
 
@@ -62,7 +62,7 @@ Visit [Node.js official website](https://nodejs.org/) and download the LTS versi
 1. **Clone the repository:**
    ```bash
    git clone <your-repo-url>
-   cd EcoFilesystem
+   cd facility-management-system
    ```
 
 2. **Install dependencies:**
@@ -70,12 +70,18 @@ Visit [Node.js official website](https://nodejs.org/) and download the LTS versi
    npm install
    ```
 
-3. **Start the development server:**
+3. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env file with your configuration
+   ```
+
+4. **Start the development server:**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser and navigate to:**
+5. **Open your browser and navigate to:**
    ```
    http://localhost:3000
    ```
@@ -153,26 +159,26 @@ Error: listen EADDRINUSE: address already in use :::3000
 ## 🏛️ Project Structure
 
 ```
-EcoFilesystem/
+facility-management-system/
 ├── public/                 # Static assets
 ├── src/
 │   ├── components/         # React components
 │   │   ├── ui/            # Shadcn/ui components
-│   │   ├── EcosystemTree.tsx
-│   │   ├── EcosystemDiagram.tsx
-│   │   └── Header.tsx
+│   │   ├── AppSidebar.tsx # Main navigation sidebar
+│   │   └── Header.tsx     # Application header
 │   ├── pages/             # Page components
-│   │   ├── Home.tsx
-│   │   ├── EcosystemExplorer.tsx
-│   │   ├── About.tsx
-│   │   └── Index.tsx
-│   ├── utils/             # Utility functions and data
-│   │   └── ecosystemData.ts
+│   │   ├── Dashboard.tsx  # Main dashboard
+│   │   ├── Assets.tsx     # Asset management
+│   │   ├── WorkOrders.tsx # Work order management
+│   │   ├── Maintenance.tsx # Maintenance scheduling
+│   │   ├── Reports.tsx    # Reporting and analytics
+│   │   └── Settings.tsx   # System settings
 │   ├── lib/               # Library functions
 │   ├── hooks/             # Custom React hooks
 │   ├── App.tsx            # Main application component
 │   ├── main.tsx           # Application entry point
 │   └── index.css          # Global styles and design system
+├── .env.example           # Environment variables template
 ├── bitbucket-pipelines.yml # CI/CD pipeline configuration
 ├── ecosystem.config.js     # PM2 ecosystem configuration
 ├── package.json           # Dependencies and scripts
@@ -192,43 +198,43 @@ EcoFilesystem/
 - **🔍 Lucide React** - Beautiful and consistent icons
 - **🔄 TanStack Query** - Data fetching and state management
 
-## 🌍 Ecosystem Data Structure
+## 🏢 Application Features
 
-The application uses a hierarchical data structure to represent forest ecosystems:
+### Dashboard
+- Real-time system overview with key metrics
+- Recent work orders and maintenance tasks
+- Asset health monitoring
+- Quick access to critical functions
 
-```typescript
-interface EcosystemNode {
-  id: string;
-  name: string;
-  type: 'ecosystem' | 'habitat' | 'species' | 'individual';
-  icon: string;
-  description: string;
-  children?: EcosystemNode[];
-  health: 'excellent' | 'good' | 'moderate' | 'poor';
-  population?: number;
-  characteristics?: string[];
-}
-```
+### Asset Management
+- Comprehensive asset tracking and cataloging
+- Location-based organization
+- Maintenance history and scheduling
+- Performance monitoring and reporting
 
-### Sample Data Hierarchy:
-```
-🌲 Temperate Forest Ecosystem
-├── 🌳 Canopy Layer
-│   ├── 🌳 Oak Grove (45 individuals)
-│   └── 🍁 Sugar Maple Stand (32 individuals)
-├── 🌿 Understory Layer
-│   ├── 🌸 Flowering Dogwood (28 individuals)
-│   └── 🌰 Hazelnut Shrubs (67 individuals)
-└── 🍄 Forest Floor
-    ├── 🌿 Christmas Fern Colony (156 individuals)
-    └── 🍄 Mycorrhizal Network
-```
+### Work Order System
+- Create, assign, and track maintenance tasks
+- Priority-based task management
+- Status tracking and completion verification
+- Integration with asset management
+
+### Maintenance Scheduling
+- Automated preventive maintenance planning
+- Customizable maintenance intervals
+- Resource allocation and scheduling
+- Compliance tracking and reporting
+
+### Reporting & Analytics
+- Performance metrics and KPIs
+- Cost analysis and budget tracking
+- Compliance and safety reporting
+- Customizable report generation
 
 ## 🚀 Deployment
 
 ### AWS EC2 Deployment with Bitbucket Pipelines
 
-This project includes automated deployment to AWS EC2 using Bitbucket Pipelines.
+This project includes automated deployment to AWS EC2 using Bitbucket Pipelines and AWS SSM.
 
 #### Required Bitbucket Variables
 
@@ -241,48 +247,80 @@ Set up the following environment variables in your Bitbucket repository settings
 
 #### EC2 Instance Setup
 
-Your EC2 instance should have:
-1. **Node.js and npm** installed
+Your Ubuntu-based EC2 instance should have:
+1. **Node.js 18+** and npm installed
 2. **PM2** installed globally: `npm install -g pm2`
-3. **Git** installed for repository access
-4. **AWS CLI** configured for SSM access
-5. **Proper security groups** allowing HTTP/HTTPS traffic
+3. **AWS CLI** configured for SSM access
+4. **SSM Agent** installed and running
+5. **Security groups** allowing HTTP traffic on port 3000
+6. **IAM role** with SSM permissions attached to the instance
 
 #### Deployment Process
 
-The Bitbucket Pipeline:
-1. Builds the React application
-2. Creates a deployment package
-3. Uploads artifacts to AWS
-4. Uses AWS SSM to send commands to EC2
-5. Downloads and extracts the build
-6. Restarts the application using PM2
+The Bitbucket Pipeline automatically:
+1. Installs dependencies and runs lint checks
+2. Builds the React application (`npm run build`)
+3. Creates a compressed tarball of the build directory
+4. Uploads artifacts to S3
+5. Uses AWS SSM to send deployment commands to EC2
+6. Downloads and extracts the new build
+7. Restarts the application using PM2 as `facility-frontend`
 
 #### Manual Deployment
 
-If you prefer manual deployment:
+For manual deployment on your EC2 instance:
 
 ```bash
-# On your EC2 instance
+# Clone and setup
 git clone <your-repo-url>
-cd EcoFilesystem
+cd facility-management-system
 npm install
+
+# Build the application
 npm run build
 
 # Start with PM2
 pm2 start ecosystem.config.js
 pm2 save
 pm2 startup
+
+# Check status
+pm2 status
+```
+
+#### AWS SSM Deployment Command Example
+
+For manual deployment via AWS CLI:
+
+```bash
+# Deploy specific build tarball
+aws ssm send-command \
+  --instance-ids i-1234567890abcdef0 \
+  --document-name "AWS-RunShellScript" \
+  --comment "Deploy Facility Management System" \
+  --parameters 'commands=[
+    "cd /opt/facility-management",
+    "pm2 stop facility-frontend || echo \"App not running\"",
+    "sudo rm -rf backup/ && sudo mkdir -p backup/",
+    "sudo mv build/ backup/ 2>/dev/null || echo \"No previous build\"",
+    "aws s3 cp s3://your-bucket/builds/facility-management-123.tar.gz ./",
+    "sudo tar -xzf facility-management-123.tar.gz",
+    "sudo chown -R ubuntu:ubuntu build/",
+    "pm2 start ecosystem.config.js || pm2 restart facility-frontend",
+    "pm2 save",
+    "pm2 status"
+  ]' \
+  --region us-east-1
 ```
 
 ## 🤝 Contributing
 
-We welcome contributions to EcoFilesystem! Here's how you can help:
+We welcome contributions to the Facility Management System! Here's how you can help:
 
 1. **Fork the repository**
 2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
 3. **Make your changes** and add tests if applicable
-4. **Commit your changes**: `git commit -m 'Add amazing feature'`
+4. **Commit your changes**: `git commit -m 'Add facility management feature'`
 5. **Push to the branch**: `git push origin feature/amazing-feature`
 6. **Open a Pull Request**
 
@@ -293,28 +331,30 @@ We welcome contributions to EcoFilesystem! Here's how you can help:
 - Test your changes on different screen sizes
 - Update documentation for significant changes
 - Ensure all lint checks pass before submitting
+- Follow the existing design system and UI patterns
 
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌱 Environmental Impact
+## 🏗️ Infrastructure Benefits
 
-EcoFilesystem aims to promote environmental awareness and education. By making forest ecosystem data accessible and engaging, we hope to inspire conservation efforts and environmental stewardship.
+The Facility Management System helps organizations optimize their infrastructure management, reduce operational costs, and improve safety compliance. By digitalizing facility operations, organizations can achieve better resource utilization and predictive maintenance capabilities.
 
-### Learn More About Forest Conservation
+### Key Benefits
 
-- [World Wildlife Fund - Forests](https://www.worldwildlife.org/habitats/forests)
-- [National Geographic - Forest Conservation](https://www.nationalgeographic.org/encyclopedia/forest/)
-- [UN Environment Programme - Forests](https://www.unep.org/explore-topics/forests)
+- **Cost Reduction**: Optimize maintenance schedules and reduce emergency repairs
+- **Improved Safety**: Track compliance and ensure timely safety inspections
+- **Asset Optimization**: Maximize asset lifespan through preventive maintenance
+- **Data-Driven Decisions**: Leverage analytics for strategic facility planning
 
 ## 🔗 Links
 
-- **Live Demo**: [EcoFilesystem App](https://your-domain.com)
+- **Live Demo**: [Facility Management System](https://your-domain.com)
 - **Documentation**: [Project Wiki](https://github.com/your-repo/wiki)
 - **Bug Reports**: [GitHub Issues](https://github.com/your-repo/issues)
 - **Feature Requests**: [GitHub Discussions](https://github.com/your-repo/discussions)
 
 ---
 
-**Made with 💚 for the planet** - Together, we can better understand and protect our natural world through technology.
+**Made with 🏢 for better infrastructure management** - Streamlining facility operations through modern technology and intelligent automation.

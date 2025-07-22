@@ -1,10 +1,10 @@
 module.exports = {
   apps: [
     {
-      name: 'ecofilesystem',
+      name: 'facility-frontend',
       script: 'npx',
-      args: 'serve -s dist -l 3000',
-      cwd: '/opt/ecofilesystem',
+      args: 'serve -s build -l 3000',
+      cwd: '/opt/facility-management',
       instances: 1,
       autorestart: true,
       watch: false,
@@ -17,9 +17,9 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000
       },
-      error_file: '/opt/ecofilesystem/logs/err.log',
-      out_file: '/opt/ecofilesystem/logs/out.log',
-      log_file: '/opt/ecofilesystem/logs/combined.log',
+      error_file: '/opt/facility-management/logs/err.log',
+      out_file: '/opt/facility-management/logs/out.log',
+      log_file: '/opt/facility-management/logs/combined.log',
       time: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true,
@@ -38,7 +38,6 @@ module.exports = {
       // Monitoring
       pmx: true,
       // Log rotation
-      log_file: '/opt/ecofilesystem/logs/app.log',
       max_size: '10M',
       retain: '7',
       compress: true,
@@ -49,14 +48,14 @@ module.exports = {
 
   deploy: {
     production: {
-      user: 'ec2-user',
+      user: 'ubuntu',
       host: ['your-ec2-instance-ip'],
       ref: 'origin/main',
       repo: 'your-repository-url',
-      path: '/opt/ecofilesystem',
+      path: '/opt/facility-management',
       'pre-deploy-local': '',
       'post-deploy': 'npm install --production && npm run build && pm2 reload ecosystem.config.js --env production && pm2 save',
-      'pre-setup': 'mkdir -p /opt/ecofilesystem/logs'
+      'pre-setup': 'mkdir -p /opt/facility-management/logs'
     }
   }
 };
