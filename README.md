@@ -102,9 +102,6 @@ Now your React frontend is ready for deployment under `/facman` path.
 
 ```
 
-Let me know if you'd like to generate and save this file automatically.
-```
-
 
 ## 🚀 Deployment
 
