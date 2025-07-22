@@ -1,234 +1,110 @@
-# Facility Management System
+Here is your `README.md` file content based exactly on your setup instructions:
 
-> **Comprehensive Digital Infrastructure** - A modern React application for managing facility assets, work orders, maintenance schedules, and reporting in an intuitive and efficient interface.
+````markdown
+# Facility Management UI Deployment
 
-![Facility Management System Screenshot](https://via.placeholder.com/800x400/3b82f6/ffffff?text=Facility+Management+System)
+## Prerequisites
 
-## 🌟 Overview
+- Ubuntu Server
+- Node.js (LTS)
+- Nginx
+- PM2
 
-The Facility Management System is a modern React application designed to streamline facility operations through comprehensive asset tracking, work order management, preventive maintenance scheduling, and detailed reporting capabilities.
-
-### ✨ Key Features
-
-- **🏢 Asset Management**: Track and monitor all facility assets with detailed information
-- **📋 Work Order System**: Create, assign, and track maintenance and repair tasks
-- **🔧 Maintenance Scheduling**: Automated preventive maintenance scheduling and reminders
-- **📊 Advanced Reporting**: Comprehensive analytics and performance reporting
-- **📱 Responsive Design**: Fully optimized for desktop, tablet, and mobile devices
-- **🎨 Modern UI**: Clean, professional interface with intuitive navigation
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-Before running this application, ensure you have Node.js installed on your system.
-
-#### Installing Node.js
-
-**Method 1: Using Node Version Manager (NVM) - Recommended**
-
-1. **Install NVM:**
-   ```bash
-   # On macOS/Linux
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-   
-   # On Windows, use nvm-windows:
-   # Download and install from: https://github.com/coreybutler/nvm-windows/releases
-   ```
-
-2. **Restart your terminal or run:**
-   ```bash
-   source ~/.bashrc
-   ```
-
-3. **Install the latest LTS version of Node.js:**
-   ```bash
-   nvm install --lts
-   nvm use --lts
-   ```
-
-4. **Verify installation:**
-   ```bash
-   node --version
-   npm --version
-   ```
-
-**Method 2: Direct Installation**
-
-Visit [Node.js official website](https://nodejs.org/) and download the LTS version for your operating system.
-
-### Running the Application
-
-1. **Clone the repository:**
-   ```bash
-   git clone <your-repo-url>
-   cd facility-management-system
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables:**
-   ```bash
-   cp .env.example .env
-   # Edit .env file with your configuration
-   ```
-
-4. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser and navigate to:**
-   ```
-   http://localhost:3000
-   ```
-
-The application will automatically reload when you make changes to the source code.
-
-### Available Scripts
-
-- `npm run dev` - Start development server on port 3000
-- `npm run build` - Build the application for production
-- `npm run preview` - Preview the production build locally
-- `npm run lint` - Run ESLint for code quality checks
-
-## 🏗️ Building for Production
-
-To create a production-ready build:
+## Setup Instructions
 
 ```bash
-# Install dependencies (if not already done)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+source ~/.bashrc
+nvm install --lts
+nvm use --lts
+node --version
+npm --version
+sudo apt install nginx -y
+````
+
+## Clone the Repository
+
+```bash
+cd /var/www/
+sudo git clone https://github.com/Immanuel1424/nature-explorer-ui.git
+sudo mv nature-explorer-ui/ facility-management
+sudo chown -R ubuntu:ubuntu facility-management/
+cd facility-management/
+```
+
+## Update PM2 Ecosystem Config
+
+```bash
+mv ecosystem.config.js ecosystem.config.cjs
+vim ecosystem.config.cjs
+```
+
+Update the following fields:
+
+```js
+args: 'serve -s dist -l 3000',  //change build to dist
+cwd: '/var/www/facility-management', //update the project path
+
+// Update the log path 
+error_file: '/var/log/facility-management/logs/err.log',
+out_file: '/var/log/facility-management/logs/out.log',
+log_file: '/var/log/facility-management/logs/combined.log',
+```
+
+## Create Log Directory
+
+```bash
+sudo mkdir -p /var/log/facility-management/logs
+sudo chown -R ubuntu:ubuntu /var/log/facility-management/logs
+```
+
+## Update `package.json`
+
+Set the preview command:
+
+```json
+"scripts": {
+  "start": "vite preview --port 3000"
+}
+```
+
+## Update `<BrowserRouter>`
+
+In `src/App.tsx`, set the base path:
+
+```tsx
+<BrowserRouter basename="/facman">
+```
+
+## Update `vite.config.ts`
+
+```ts
+export default defineConfig(({ mode }) => ({
+  base: "/facman/",
+  server: {
+    host: "::",
+    port: 8080,
+  }
+}))
+```
+
+## Install Dependencies
+
+```bash
+npm install -g serve
 npm install
-
-# Create production build
-npm run build
-
-# The built files will be in the 'dist' directory
+npm install -g pm2
 ```
 
-To preview the production build locally:
+---
 
-```bash
-npm run preview
-```
-
-## 🔧 Port Configuration
-
-The application runs on **port 3000** by default. 
-
-### Troubleshooting Port Conflicts
-
-If port 3000 is already in use, you'll see an error like:
-```
-Error: listen EADDRINUSE: address already in use :::3000
-```
-
-**Solutions:**
-
-1. **Kill the process using port 3000:**
-   ```bash
-   # On macOS/Linux
-   lsof -ti:3000 | xargs kill -9
-   
-   # On Windows
-   netstat -ano | findstr :3000
-   taskkill /PID <PID_NUMBER> /F
-   ```
-
-2. **Use a different port:**
-   ```bash
-   # Method 1: Set PORT environment variable
-   PORT=3001 npm run dev
-   
-   # Method 2: Modify vite.config.ts
-   # Change the server.port value to your desired port
-   ```
-
-3. **Check what's using the port:**
-   ```bash
-   # On macOS/Linux
-   lsof -i :3000
-   
-   # On Windows
-   netstat -ano | findstr :3000
-   ```
-
-## 🏛️ Project Structure
+Now your React frontend is ready for deployment under `/facman` path.
 
 ```
-facility-management-system/
-├── public/                 # Static assets
-├── src/
-│   ├── components/         # React components
-│   │   ├── ui/            # Shadcn/ui components
-│   │   ├── AppSidebar.tsx # Main navigation sidebar
-│   │   └── Header.tsx     # Application header
-│   ├── pages/             # Page components
-│   │   ├── Dashboard.tsx  # Main dashboard
-│   │   ├── Assets.tsx     # Asset management
-│   │   ├── WorkOrders.tsx # Work order management
-│   │   ├── Maintenance.tsx # Maintenance scheduling
-│   │   ├── Reports.tsx    # Reporting and analytics
-│   │   └── Settings.tsx   # System settings
-│   ├── lib/               # Library functions
-│   ├── hooks/             # Custom React hooks
-│   ├── App.tsx            # Main application component
-│   ├── main.tsx           # Application entry point
-│   └── index.css          # Global styles and design system
-├── .env.example           # Environment variables template
-├── bitbucket-pipelines.yml # CI/CD pipeline configuration
-├── ecosystem.config.js     # PM2 ecosystem configuration
-├── package.json           # Dependencies and scripts
-├── tailwind.config.ts     # Tailwind CSS configuration
-├── tsconfig.json          # TypeScript configuration
-└── vite.config.ts         # Vite build configuration
+
+Let me know if you'd like to generate and save this file automatically.
 ```
 
-## 🛠️ Technology Stack
-
-- **⚛️ React 18** - Modern React with hooks and functional components
-- **📘 TypeScript** - Type-safe development for better reliability
-- **⚡ Vite** - Fast build tool and development server
-- **🎨 Tailwind CSS** - Utility-first CSS framework
-- **🧩 Shadcn/ui** - Accessible and customizable UI components
-- **🚦 React Router DOM** - Client-side routing
-- **🔍 Lucide React** - Beautiful and consistent icons
-- **🔄 TanStack Query** - Data fetching and state management
-
-## 🏢 Application Features
-
-### Dashboard
-- Real-time system overview with key metrics
-- Recent work orders and maintenance tasks
-- Asset health monitoring
-- Quick access to critical functions
-
-### Asset Management
-- Comprehensive asset tracking and cataloging
-- Location-based organization
-- Maintenance history and scheduling
-- Performance monitoring and reporting
-
-### Work Order System
-- Create, assign, and track maintenance tasks
-- Priority-based task management
-- Status tracking and completion verification
-- Integration with asset management
-
-### Maintenance Scheduling
-- Automated preventive maintenance planning
-- Customizable maintenance intervals
-- Resource allocation and scheduling
-- Compliance tracking and reporting
-
-### Reporting & Analytics
-- Performance metrics and KPIs
-- Cost analysis and budget tracking
-- Compliance and safety reporting
-- Customizable report generation
 
 ## 🚀 Deployment
 
