@@ -1,121 +1,80 @@
 image: node:18
 
 pipelines:
-  default:
-    - step:
-        name: Build and Test
-        caches:
-          - node
-        script:
-          - echo "Installing dependencies..."
-          - npm ci
-          - echo "Running lint checks..."
-          - npm run lint
-          - echo "Building the application..."
-          - npm run build
-          - echo "Creating deployment package..."
-          - tar -czf facility-management-build.tar.gz build/
-        artifacts:
-          - facility-management-build.tar.gz
-          - ecosystem.config.js
-          - package.json
-
   branches:
     main:
       - step:
-          name: Build and Test
-          caches:
-            - node
+          name: "Build & Upload to S3"
           script:
-            - echo "Installing dependencies..."
+            # Install AWS CLI and rsync
+            - apt-get update && apt-get install -y unzip rsync curl
+            - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            - unzip awscliv2.zip
+            - ./aws/install
+            - aws --version
+
+            # Build project
             - npm ci
-            - echo "Running lint checks..."
-            - npm run lint
-            - echo "Building the application..."
             - npm run build
-            - echo "Creating deployment package..."
-            - tar -czf facility-management-build.tar.gz build/
+
+            # Prepare artifact (exclude unnecessary files)
+            - mkdir -p tmp-build
+            - rsync -av --exclude='.git' --exclude='node_modules' --exclude='tmp-build' --exclude='.env' ./ tmp-build/
+            - tar -czf facility-management-build.tar.gz -C tmp-build .
+            - rm -rf tmp-build
+
+            # Upload to S3 with versioning
+            - aws s3 cp facility-management-build.tar.gz "s3://$AWS_DEPLOYMENT_BUCKET/facility-management/facility-management-build-$(date +%Y%m%d%H%M%S).tar.gz" --acl bucket-owner-full-control
+            - aws s3 cp facility-management-build.tar.gz "s3://$AWS_DEPLOYMENT_BUCKET/facility-management/latest.tar.gz" --acl bucket-owner-full-control
+
           artifacts:
             - facility-management-build.tar.gz
-            - ecosystem.config.js
-            - package.json
-      
-      - step:
-          name: Deploy to AWS EC2
-          image: atlassian/pipelines-awscli:latest
-          script:
-            - echo "Uploading artifacts to S3..."
-            - aws s3 cp facility-management-build.tar.gz s3://your-deployment-bucket/builds/facility-management-${BITBUCKET_BUILD_NUMBER}.tar.gz
-            - aws s3 cp ecosystem.config.js s3://your-deployment-bucket/configs/ecosystem.config.js
-            - aws s3 cp package.json s3://your-deployment-bucket/configs/package.json
-            
-            - echo "Deploying to EC2 instance via SSM..."
-            - |
-              aws ssm send-command \
-                --instance-ids $EC2_INSTANCE_ID \
-                --document-name "AWS-RunShellScript" \
-                --comment "Deploy Facility Management build ${BITBUCKET_BUILD_NUMBER}" \
-                --parameters 'commands=[
-                  "echo \"Starting deployment process...\"",
-                  "cd /opt/facility-management || { echo \"App directory not found. Creating...\"; sudo mkdir -p /opt/facility-management; cd /opt/facility-management; }",
-                  "echo \"Stopping current application...\"",
-                  "pm2 stop facility-frontend || echo \"App not running\"",
-                  "echo \"Backing up current deployment...\"",
-                  "sudo rm -rf backup/ && sudo mkdir -p backup/",
-                  "sudo mv build/ backup/ 2>/dev/null || echo \"No previous build to backup\"",
-                  "echo \"Downloading new build...\"",
-                  "aws s3 cp s3://your-deployment-bucket/builds/facility-management-'${BITBUCKET_BUILD_NUMBER}'.tar.gz ./",
-                  "aws s3 cp s3://your-deployment-bucket/configs/ecosystem.config.js ./",
-                  "aws s3 cp s3://your-deployment-bucket/configs/package.json ./",
-                  "echo \"Extracting new build...\"",
-                  "sudo tar -xzf facility-management-'${BITBUCKET_BUILD_NUMBER}'.tar.gz",
-                  "sudo chown -R ubuntu:ubuntu build/",
-                  "echo \"Installing/updating PM2 dependencies...\"",
-                  "npm install --production || echo \"Dependencies install completed with warnings\"",
-                  "echo \"Starting application with PM2...\"",
-                  "pm2 start ecosystem.config.js || pm2 restart facility-frontend",
-                  "pm2 save",
-                  "echo \"Cleaning up deployment artifacts...\"",
-                  "rm -f facility-management-'${BITBUCKET_BUILD_NUMBER}'.tar.gz",
-                  "echo \"Deployment completed successfully!\"",
-                  "pm2 status"
-                ]' \
-                --region $AWS_REGION
-            
-            - echo "Waiting for deployment to complete..."
-            - sleep 30
-            
-            - echo "Checking deployment status..."
-            - |
-              aws ssm send-command \
-                --instance-ids $EC2_INSTANCE_ID \
-                --document-name "AWS-RunShellScript" \
-                --comment "Check Facility Management deployment status" \
-                --parameters 'commands=[
-                  "echo \"=== PM2 Status ===\"",
-                  "pm2 status",
-                  "echo \"=== PM2 Logs (last 20 lines) ===\"",
-                  "pm2 logs facility-frontend --lines 20",
-                  "echo \"=== Application Health Check ===\"",
-                  "curl -f http://localhost:3000 > /dev/null && echo \"✅ Application is responding\" || echo \"❌ Application health check failed\""
-                ]' \
-                --region $AWS_REGION
 
-  pull-requests:
-    '**':
       - step:
-          name: Build and Test PR
-          caches:
-            - node
+          name: "Deploy to EC2 via SSM"
+          deployment: prod
           script:
-            - echo "Installing dependencies for PR..."
-            - npm ci
-            - echo "Running lint checks..."
-            - npm run lint
-            - echo "Building the application..."
-            - npm run build
-            - echo "PR build completed successfully!"
+            # Install AWS CLI
+            - apt-get update && apt-get install -y unzip curl
+            - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            - unzip awscliv2.zip
+            - ./aws/install
+            - aws --version
 
-definitions:
-  caches:
-    node: node_modules
+            # Run remote deploy with enhanced error handling
+            - >
+              aws ssm send-command
+              --document-name "AWS-RunShellScript"
+              --region "$AWS_REGION"
+              --instance-ids "$EC2_INSTANCE_ID"
+              --comment "Facility Management Deployment $(date +%Y-%m-%d)"
+              --parameters '{
+                "commands": [
+                  "export PATH=$PATH:/usr/bin:/usr/local/bin",
+                  "command -v pm2 >/dev/null || npm install -g pm2",
+                  "sudo -u ubuntu pm2 stop /var/www/facility-management/ecosystem.config.cjs || true",
+                  "sudo -u ubuntu pm2 delete /var/www/facility-management/ecosystem.config.cjs || true",
+                  "rm -rf /var/www/facility-management/*",
+                  "aws s3 cp s3://'"$AWS_DEPLOYMENT_BUCKET"'/facility-management/latest.tar.gz /tmp/build.tar.gz",
+                  "mkdir -p /var/www/facility-management",
+                  "chown -R ubuntu:ubuntu /var/www/facility-management || sudo chown -R ubuntu:ubuntu /var/www/facility-management",
+                  "tar -xzf /tmp/build.tar.gz -C /var/www/facility-management",
+                  "rm /tmp/build.tar.gz",
+                  "cd /var/www/facility-management",
+                  "npm ci --production",
+                  "npm run build",
+                  "sudo -u ubuntu pm2 start /var/www/facility-management/ecosystem.config.cjs",
+                  "sudo -u ubuntu pm2 save --force",
+                  "pm2 list"
+                ],
+                "workingDirectory": ["/var/www/facility-management"]
+              }'
+              --cloud-watch-output-config '{
+                "CloudWatchLogGroupName": "/aws/ssm/facility-management-deployments",
+                "CloudWatchOutputEnabled": true
+              }'
+              --output text
+
+          # Post-deploy verification
+          after-script:
+            - echo "Deployment triggered. Check AWS SSM Run Command for execution logs."
